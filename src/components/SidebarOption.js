@@ -1,27 +1,42 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { collection, addDoc } from 'firebase/firestore';
 import { useDispatch } from "react-redux";
 import { enterRoom } from "../features/appSlice";
 import { db } from '../firebase';
+import CustomDialog from './CustomDialog'; // Import the dialog
+import LockIcon from "@material-ui/icons/Lock"
+import PersonOutlinedIcon from '@material-ui/icons/PersonOutline'
+import CloseIcon from "@material-ui/icons/Close"
 
-
-function SidebarOption({ Icon, title, addChannelOption, id }) {
+function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channelType }) {
     const dispatch = useDispatch();
-    
-    const addChannel = async () => {
-        const channelName = prompt('Please enter the channel name');
+    const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog visibility
 
-        if (channelName) {
-            try {
-                const channelsCollection = collection(db, 'rooms');
-                await addDoc(channelsCollection, { name: channelName });
-                console.log('Channel added successfully');
-            } catch (error) {
-                console.error('Error adding channel: ', error);
-            }
-        };
+    const addChannel = async (channelName, isAnonymous, channelType ) => {
+    if (channelName) {
+        try {
+            const channelsCollection = collection(db, 'rooms');
+            await addDoc(channelsCollection, { name: channelName, isAnonymous, channelType });
+            console.log('Channel added successfully');
+        } catch (error) {
+            console.error('Error adding channel: ', error);
+        }
     }
+};
+
+    const openDialog = () => {
+        setDialogOpen(true);
+    };
+
+    const closeDialog = () => {
+        setDialogOpen(false);
+    };
+
+    const handleDialogSubmit = (channelName, isAnonymous, channelType) => {
+        addChannel(channelName, isAnonymous, channelType);
+        closeDialog(); // Close the dialog after submission
+    };
 
     const selectChannel = () => {
         if (id) {
@@ -34,22 +49,40 @@ function SidebarOption({ Icon, title, addChannelOption, id }) {
     };
 
     return (
-        <SidebarOptionContainer 
-            onClick={addChannelOption ? addChannel : selectChannel}
-        >
-            { Icon && <Icon fontSize="small" style={ { padding: 10 } } />}
-            {Icon ? (
-                <h3>{title}</h3>
-            ) : (
-                <SidebarOptionChannel>
-                    <span>#</span> {title}
-                </SidebarOptionChannel>
+        <>
+            <SidebarOptionContainer 
+                onClick={addChannelOption ? openDialog : selectChannel} // Use openDialog here
+            >
+                {Icon && <Icon fontSize="small" style={{ padding: 10 }} />}
+                { isAnonymous && (
+                    <IconContainer>
+                        <PersonOutlinedIcon style={{ fontSize: 30, verticalAlign: 'middle' }} />
+                        <CloseIcon style={{ fontSize: 25, position: 'absolute', top: 7, left: 3, color: 'red' }} />
+                    </IconContainer>
+                )}
+                {Icon ? (
+                    <h3>{title}</h3>
+                ) : (
+                    <SidebarOptionChannel>
+                        {channelType === 'private' ? <LockIcon style={{ fontSize: 20 }} /> : <span>#</span>} {title}
+                    </SidebarOptionChannel>
+                )}
+            </SidebarOptionContainer>
+            
+            {/* Render the dialog */}
+            {addChannelOption && (
+                <CustomDialog 
+                    open={dialogOpen} 
+                    onClose={closeDialog} 
+                    onSubmit={handleDialogSubmit}
+                />
             )}
-        </SidebarOptionContainer>
+        </>
     );
+
 }
 
-export default SidebarOption
+export default SidebarOption;
 
 const SidebarOptionContainer = styled.div`
     display: flex;
@@ -65,6 +98,7 @@ const SidebarOptionContainer = styled.div`
 
     > h3 {
         font-weight: 500;
+        margin-left: 10px;
     }
 
     > h3 > span {
@@ -76,4 +110,9 @@ const SidebarOptionChannel = styled.h3`
     padding: 10px 0;
     font-weight: 300;
 
+`;
+
+const IconContainer = styled.div`
+    position: relative;
+    display: inline-block;
 `;

@@ -1,13 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
 
-function Message({ message, timestamp, user, userImage }) {
+function Message({ message, timestamp, user, isAnonymous, userImage, channelType }) {
+
     return (
         <MessageContainer>
-            <img src={userImage} alt="" />
+            <img src={ isAnonymous ? '' : userImage} alt="" />
             <MessageInfo>
             <h4>
-                {user}
+                { isAnonymous ? '' : user }
                 <span>
                     {new Date(timestamp?.toDate()).toUTCString()}
                 </span>
@@ -18,7 +19,7 @@ function Message({ message, timestamp, user, userImage }) {
     );
 }
 
-export default Message;
+export default Message; 
 
 const MessageContainer = styled.div`
     display: flex;
@@ -29,6 +30,11 @@ const MessageContainer = styled.div`
         height: 50px;
         border-radius: 8px;
     }
+
+    ${({ channelType }) => channelType === 'private' && `
+        background-color: #f5f5f5; /* Example style for private messages */
+        border-left: 5px solid #ccc;
+    `}
 `;
 
 const MessageInfo = styled.div``;

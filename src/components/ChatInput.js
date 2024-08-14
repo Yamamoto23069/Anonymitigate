@@ -25,7 +25,7 @@ function ChatInput({ channelName, channelId, chatRef }) {
     await addDoc(messagesCollectionRef, {
         message: input,
         timestamp: serverTimestamp(),
-        user: user?.displayName,
+        user: user?.displayName, 
         userImage: user.photoURL,
     });
 

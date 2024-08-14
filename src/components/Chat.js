@@ -1,14 +1,14 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined"
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined"
+import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined";
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import { useSelector } from "react-redux";
-import { selectRoomId } from "../features/appSlice"
-import ChatInput from "./ChatInput"
+import { selectRoomId } from "../features/appSlice";
+import ChatInput from "./ChatInput";
 import { useCollection, useDocument } from "react-firebase-hooks/firestore";
 import { db } from '../firebase';
 import { collection, doc, orderBy, query } from 'firebase/firestore';
-import Message from "./Message"
+import Message from "./Message";
 
 function Chat() {
     const chatRef = useRef(null);
@@ -17,7 +17,7 @@ function Chat() {
         roomId && doc(db, 'rooms', roomId)
     );
     const [roomMessages, loading] = useCollection(
-        roomId && 
+        roomId &&
         query(
             collection(doc(db, 'rooms', roomId), 'messages'),
             orderBy('timestamp', 'asc')
@@ -28,71 +28,76 @@ function Chat() {
         chatRef?.current?.scrollIntoView({
             behavior: "smooth",
         });
-    }, [roomId, loading])
+    }, [roomId, loading]);
+
+    // デフォルト値を設定し、roomDetails が null または undefined の場合に備える
+    const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
 
     return (
         <ChatContainer>
-            {roomDetails && roomMessages && (
+            {roomDetails && roomMessages ? (
                 <>
-                <Header>
-                    <HeaderLeft>
-                        <h4>
-                            <strong>#{roomDetails?.data().name}</strong>
-                        </h4>
-                        <StarBorderOutlinedIcon />
-                    </HeaderLeft>
-    
-                    <HeaderRight>
-                        <p>
-                            <InfoOutlinedIcon />Details
-                        </p>
-                    </HeaderRight>
-                </Header>
-    
+                    <Header>
+                        <HeaderLeft>
+                            <h4>
+                                <strong>#{roomDetails?.data().name}</strong>
+                            </h4>
+                            <StarBorderOutlinedIcon />
+                        </HeaderLeft>
+
+                        <HeaderRight>
+                            <p>
+                                <InfoOutlinedIcon />Details
+                            </p>
+                        </HeaderRight>
+                    </Header>
+
                     <ChatMessages>
                         {roomMessages?.docs.map(doc => {
                             const { message, timestamp, user, userImage } = doc.data();
-    
-                            return (
-                                <Message 
-                                    key={doc.id}
-                                    message={message}
-                                    timestamp={timestamp}
-                                    user={user}
-                                    userImage={userImage}
-                                />
-                            );
-                        })}
+                                return (
+                                    <Message
+                                        key={doc.id}
+                                        message={message}
+                                        timestamp={timestamp}
+                                        user={user}
+                                        isAnonymous={isAnonymous}
+                                        userImage={userImage}
+                                    />
+                                );
+                            }
+                        )}
                         <ChatBottom ref={chatRef} />
                     </ChatMessages>
-    
-                    <ChatInput 
+
+                    <ChatInput
                         chatRef={chatRef}
                         channelName={roomDetails?.data().name}
                         channelId={roomId}
                     />
                 </>
+            ) : (
+                <p>Loading...</p> 
             )}
         </ChatContainer>
     );
 }
 
-export default Chat
+export default Chat;
 
 const ChatBottom = styled.div`
-    padding-bottom = 200px;
-`
+    padding-bottom: 200px;
+`;
 
 const Header = styled.div`
-display: flex;
-justify-content: space-between;
-padding: 20px;
-border-bottom: 1px solid lightgray;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid lightgray;
 `;
 
 const ChatMessages = styled.div`
-
-`
+`;
 
 const HeaderLeft = styled.div`
     display: flex;
@@ -129,4 +134,3 @@ const ChatContainer = styled.div`
     overflow-y: scroll;
     margin-top: 50px;
 `;
-
