@@ -6,7 +6,7 @@ import { enterRoom } from "../features/appSlice";
 import { db } from '../firebase';
 
 
-function SidebarOption({ Icon, title, addChannelOption, id }) {
+function SidebarOption({ Icon, title, addChannelOption, id, onClick }) {
     const dispatch = useDispatch();
     
     const addChannel = async () => {
@@ -35,7 +35,7 @@ function SidebarOption({ Icon, title, addChannelOption, id }) {
 
     return (
         <SidebarOptionContainer 
-            onClick={addChannelOption ? addChannel : selectChannel}
+            onClick={onClick || (addChannelOption ? addChannel : selectChannel)}
         >
             { Icon && <Icon fontSize="small" style={ { padding: 10 } } />}
             {Icon ? (

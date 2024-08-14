@@ -1,66 +1,77 @@
-import React from 'react'
-import styled from 'styled-components'
-import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord"
-import CreateIcon from "@material-ui/icons/Create"
-import InsertCommentIcon from "@material-ui/icons/InsertComment"
-import InboxIcon from "@material-ui/icons/Inbox"
-import DraftsIcon from "@material-ui/icons/Drafts"
-import BookmarkBorderIcon from "@material-ui/icons/BookmarkBorder"
-import FileCopyIcon from "@material-ui/icons/FileCopy"
-import PeopleAltIcon from "@material-ui/icons/PeopleAlt"
-import AppsIcon from "@material-ui/icons/Apps"
-import ExpandLessIcon from "@material-ui/icons/ExpandLess"
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
+import CreateIcon from "@material-ui/icons/Create";
+import InsertCommentIcon from "@material-ui/icons/InsertComment";
+import InboxIcon from "@material-ui/icons/Inbox";
+import DraftsIcon from "@material-ui/icons/Drafts";
+import BookmarkBorderIcon from "@material-ui/icons/BookmarkBorder";
+import FileCopyIcon from "@material-ui/icons/FileCopy";
+import PeopleAltIcon from "@material-ui/icons/PeopleAlt";
+import AppsIcon from "@material-ui/icons/Apps";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import SidebarOption from './SidebarOption';
-import AddIcon from "@material-ui/icons/Add"
-import { useCollection } from "react-firebase-hooks/firestore"
+import AddIcon from "@material-ui/icons/Add";
+import { useCollection } from "react-firebase-hooks/firestore";
 import { db, auth } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
-import { useAuthState } from "react-firebase-hooks/auth"
+import { collection } from 'firebase/firestore';
+import { useAuthState } from "react-firebase-hooks/auth";
 
 function Sidebar() {
-    const [channels, loading, error] = useCollection(collection(db, "rooms"));
+    const [channels] = useCollection(collection(db, "rooms"));
     const [user] = useAuthState(auth);
 
-  return (
-    <SidebarContainer>
-        <SidebarHeader>
-            <SidebarInfo>
-                <h2>PAPA FAM HQ</h2>
-                <h3>
-                    <FiberManualRecordIcon />
-                    {user?.displayName}
-                </h3>
-            </SidebarInfo>
-            <CreateIcon />
-        </SidebarHeader>
+    const [showChannels, setShowChannels] = useState(true); // チャンネル表示状態の管理
 
-        <SidebarOption Icon={InsertCommentIcon} title="Threads" />
-        <SidebarOption Icon={InboxIcon} title="Mentions & reactions" />
-        <SidebarOption Icon={DraftsIcon} title="Saved items" />
-        <SidebarOption Icon={BookmarkBorderIcon} title="Channel browser" />
-        <SidebarOption Icon={PeopleAltIcon} title="People & user groups" />
-        <SidebarOption Icon={AppsIcon} title="Apps" />
-        <SidebarOption Icon={FileCopyIcon} title="File browser" />
-        <SidebarOption Icon={ExpandLessIcon} title="Show less" />
-        <hr />
-        <SidebarOption Icon={ExpandMoreIcon} title="Channels" />
-        <hr />
-        <SidebarOption Icon={AddIcon} addChannelOption title="Add Channel" />
+    const toggleChannelsVisibility = () => {
+        setShowChannels(!showChannels); // 表示/非表示を切り替える
+    };
 
-        {channels?.docs.map(doc => (
+    return (
+        <SidebarContainer>
+            <SidebarHeader>
+                <SidebarInfo>
+                    <h2>PAPA FAM HQ</h2>
+                    <h3>
+                        <FiberManualRecordIcon />
+                        {user?.displayName}
+                    </h3>
+                </SidebarInfo>
+                <CreateIcon />
+            </SidebarHeader>
+
+            <SidebarOption Icon={InsertCommentIcon} title="Threads" />
+            <SidebarOption Icon={InboxIcon} title="Mentions & reactions" />
+            <SidebarOption Icon={DraftsIcon} title="Saved items" />
+            <SidebarOption Icon={BookmarkBorderIcon} title="Channel browser" />
+            <SidebarOption Icon={PeopleAltIcon} title="People & user groups" />
+            <SidebarOption Icon={AppsIcon} title="Apps" />
+            <SidebarOption Icon={FileCopyIcon} title="File browser" />
+            <SidebarOption Icon={ExpandLessIcon} title="Show less" />
+            <hr />
             <SidebarOption 
-            key={doc.id} 
-            id={doc.id} 
-            title={doc.data().name}
+                Icon={showChannels ? ExpandLessIcon : ExpandMoreIcon}
+                title="Channels" 
+                onClick={toggleChannelsVisibility} 
             />
-        ))}
-        
-    </SidebarContainer>
-  );
+            <hr />
+            <SidebarOption Icon={AddIcon} addChannelOption title="Add Channel" />
+
+            {/* チャンネルリストの表示 */}
+            {showChannels && channels?.docs.map(doc => (
+                <SidebarOption 
+                    key={doc.id} 
+                    id={doc.id} 
+                    title={doc.data().name}
+                />
+            ))}
+            
+        </SidebarContainer>
+    );
 }
 
-export default Sidebar
+export default Sidebar;
 
 const SidebarContainer = styled.div`
     color: white;
@@ -69,6 +80,17 @@ const SidebarContainer = styled.div`
     border-top: 1px solid #49274b;
     max-width: 260px;
     margin-top: 60px;
+    height: 100vh;
+    overflow-y: auto;
+
+    /* スクロールバーを非表示にするスタイル */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+
+    /* Chrome, Edge, Safari, Opera */
+    &::-webkit-scrollbar {
+        display: none;
+    }
 
     > hr {
         margin-top: 10px;
