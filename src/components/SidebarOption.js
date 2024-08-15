@@ -9,7 +9,9 @@ import LockIcon from "@material-ui/icons/Lock"
 import PersonOutlinedIcon from '@material-ui/icons/PersonOutline'
 import CloseIcon from "@material-ui/icons/Close"
 
+
 function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channelType }) {
+
     const dispatch = useDispatch();
     const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog visibility
 

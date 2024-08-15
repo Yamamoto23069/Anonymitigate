@@ -1,8 +1,10 @@
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// firebase.js
+
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+// Cấu hình Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBtjnvQXWfmyBVHuB7q8ZC3VACq5nwV4dE",
     authDomain: "slack-clone-yt-a64e2.firebaseapp.com",
@@ -11,13 +13,15 @@ const firebaseConfig = {
     messagingSenderId: "711318416118",
     appId: "1:711318416118:web:4cfec3873da1adc9dedad7",
     measurementId: "G-33ZTRPS19F"
-  };
+};
 
+// Khởi tạo Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 
-const db = getFirestore();
-const auth = getAuth();
-const provider = new GoogleAuthProvider();
+// Khởi tạo các dịch vụ Firebase
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
-export { auth, provider, db, signInWithPopup };
-
+export { auth, googleProvider, githubProvider, db, signInWithPopup };
