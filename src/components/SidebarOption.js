@@ -1,31 +1,30 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
+import React, { useState } from 'react';
+import styled from 'styled-components';
 import { collection, addDoc } from 'firebase/firestore';
 import { useDispatch } from "react-redux";
 import { enterRoom } from "../features/appSlice";
 import { db } from '../firebase';
 import CustomDialog from './CustomDialog'; // Import the dialog
-import LockIcon from "@material-ui/icons/Lock"
-import PersonOutlinedIcon from '@material-ui/icons/PersonOutline'
-import CloseIcon from "@material-ui/icons/Close"
+import LockIcon from "@material-ui/icons/Lock";
+import PersonOutlinedIcon from '@material-ui/icons/PersonOutline';
+import CloseIcon from "@material-ui/icons/Close";
 
-
-function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channelType }) {
-
+function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channelType, onClick }) {
     const dispatch = useDispatch();
     const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog visibility
 
-    const addChannel = async (channelName, isAnonymous, channelType ) => {
-    if (channelName) {
-        try {
-            const channelsCollection = collection(db, 'rooms');
-            await addDoc(channelsCollection, { name: channelName, isAnonymous, channelType });
-            console.log('Channel added successfully');
-        } catch (error) {
-            console.error('Error adding channel: ', error);
+    const addChannel = async (channelName, isAnonymous, channelType) => {
+        if (channelName) {
+            try {
+                const channelsCollection = collection(db, 'rooms');
+                await addDoc(channelsCollection, { name: channelName, isAnonymous: isAnonymous || false,  // デフォルトはfalse
+                    channelType: channelType || 'public' });
+                console.log('Channel added successfully');
+            } catch (error) {
+                console.error('Error adding channel: ', error);
+            }
         }
-    }
-};
+    };
 
     const openDialog = () => {
         setDialogOpen(true);
@@ -53,10 +52,10 @@ function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channel
     return (
         <>
             <SidebarOptionContainer 
-                onClick={addChannelOption ? openDialog : selectChannel} // Use openDialog here
+                onClick={addChannelOption ? openDialog : selectChannel}
             >
                 {Icon && <Icon fontSize="small" style={{ padding: 10 }} />}
-                { isAnonymous && (
+                {isAnonymous && (
                     <IconContainer>
                         <PersonOutlinedIcon style={{ fontSize: 30, verticalAlign: 'middle' }} />
                         <CloseIcon style={{ fontSize: 25, position: 'absolute', top: 7, left: 3, color: 'red' }} />
@@ -70,8 +69,8 @@ function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channel
                     </SidebarOptionChannel>
                 )}
             </SidebarOptionContainer>
-            
-            {/* Render the dialog */}
+
+            {/* Render the dialog only if addChannelOption is true */}
             {addChannelOption && (
                 <CustomDialog 
                     open={dialogOpen} 
@@ -81,7 +80,6 @@ function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channel
             )}
         </>
     );
-
 }
 
 export default SidebarOption;
@@ -111,7 +109,6 @@ const SidebarOptionContainer = styled.div`
 const SidebarOptionChannel = styled.h3`
     padding: 10px 0;
     font-weight: 300;
-
 `;
 
 const IconContainer = styled.div`

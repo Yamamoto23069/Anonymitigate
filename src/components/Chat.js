@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
@@ -13,9 +13,7 @@ import Message from "./Message";
 function Chat() {
     const chatRef = useRef(null);
     const roomId = useSelector(selectRoomId);
-    const [roomDetails] = useDocument(
-        roomId && doc(db, 'rooms', roomId)
-    );
+    const [roomDetails] = useDocument(roomId && doc(db, 'rooms', roomId));
     const [roomMessages, loading] = useCollection(
         roomId &&
         query(
@@ -24,13 +22,43 @@ function Chat() {
         )
     );
 
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [justReplied, setJustReplied] = useState(false);
+    
     useEffect(() => {
-        chatRef?.current?.scrollIntoView({
-            behavior: "smooth",
-        });
-    }, [roomId, loading]);
+        // リプライが設定されたときにフラグを立てる
+        if (replyingTo) {
+            setJustReplied(true);
+        }
+    }, [replyingTo]);
 
-    // デフォルト値を設定し、roomDetails が null または undefined の場合に備える
+    useEffect(() => {
+        // loading が完了し、かつリプライが解除されたときにフラグが立っていなければスクロール
+        if (!replyingTo && !justReplied) {
+            console.log('Scrolling into view because replyingTo is null and roomMessages are not empty'); // デバッグ用
+            chatRef?.current?.scrollIntoView({
+                behavior: "smooth",
+            });
+        }
+        if (!replyingTo) {
+            setJustReplied(false);
+        }
+    }, [roomId, roomMessages, loading, replyingTo, justReplied]);
+
+    const handleReply = (messageId) => {
+        if (replyingTo === messageId) {
+            setReplyingTo(null);
+        } else {
+            setReplyingTo(messageId);
+        }
+    };
+
+    const handleCancelReply = () => {
+        console.log('handleCancelReply called, resetting replyingTo');
+        setReplyingTo(null);
+    };
+    
+
     const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
 
     return (
@@ -54,26 +82,51 @@ function Chat() {
 
                     <ChatMessages>
                         {roomMessages?.docs.map(doc => {
-                            const { message, timestamp, user, userImage } = doc.data();
+                            const { message, timestamp, user, userImage, parentMessageId } = doc.data();
+
+                            if (!parentMessageId) {
                                 return (
-                                    <Message
-                                        key={doc.id}
-                                        message={message}
-                                        timestamp={timestamp}
-                                        user={user}
-                                        isAnonymous={isAnonymous}
-                                        userImage={userImage}
-                                    />
+                                    <React.Fragment key={doc.id}>
+                                        <Message
+                                            message={message}
+                                            timestamp={timestamp}
+                                            user={user}
+                                            userImage={userImage}
+                                            channelId={roomId}
+                                            messageId={doc.id}
+                                            isAnonymous={isAnonymous}
+                                            onReply={() => handleReply(doc.id)}
+                                            isReplying={replyingTo === doc.id}
+                                        />
+                                        {roomMessages?.docs
+                                            .filter(replyDoc => replyDoc.data().parentMessageId === doc.id)
+                                            .map(replyDoc => (
+                                                <ReplyContainer key={replyDoc.id}>
+                                                    <Message
+                                                        message={replyDoc.data().message}
+                                                        timestamp={replyDoc.data().timestamp}
+                                                        user={replyDoc.data().user}
+                                                        userImage={replyDoc.data().userImage}
+                                                        channelId={roomId}
+                                                        messageId={replyDoc.id}
+                                                        isThread={true}
+                                                    />
+                                                </ReplyContainer>
+                                            ))}
+                                    </React.Fragment>
                                 );
                             }
-                        )}
+                            return null;
+                        })}
                         <ChatBottom ref={chatRef} />
                     </ChatMessages>
 
-                    <ChatInput
+                    <ChatInput 
                         chatRef={chatRef}
                         channelName={roomDetails?.data().name}
                         channelId={roomId}
+                        parentMessage={replyingTo ? roomMessages.docs.find(doc => doc.id === replyingTo).data() : null}
+                        onCancelReply={handleCancelReply}
                     />
                 </>
             ) : (
@@ -96,8 +149,7 @@ const Header = styled.div`
     border-bottom: 1px solid lightgray;
 `;
 
-const ChatMessages = styled.div`
-`;
+const ChatMessages = styled.div``;
 
 const HeaderLeft = styled.div`
     display: flex;
@@ -132,5 +184,15 @@ const ChatContainer = styled.div`
     flex: 0.7;
     flex-grow: 1;
     overflow-y: scroll;
-    margin-top: 50px;
+    margin-top: 131px;
 `;
+
+const ReplyContainer = styled.div`
+    margin-left: 50px;
+    border-left: 2px solid #ccc;
+    padding-left: 10px;
+    background-color: #f9f9f9;
+    margin-top: 10px;
+    padding-top: 10px;
+`;
+
