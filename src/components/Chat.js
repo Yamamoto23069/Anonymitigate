@@ -74,16 +74,18 @@ function Chat() {
                                         {roomMessages?.docs
                                             .filter(replyDoc => replyDoc.data().parentMessageId === doc.id)
                                             .map(replyDoc => (
-                                                <Message
-                                                    key={replyDoc.id}
-                                                    message={replyDoc.data().message}
-                                                    timestamp={replyDoc.data().timestamp}
-                                                    user={replyDoc.data().user}
-                                                    userImage={replyDoc.data().userImage}
-                                                    channelId={roomId}
-                                                    messageId={replyDoc.id}
-                                                    isThread={true}
-                                                />
+                                                <ReplyContainer key={replyDoc.id}>
+                                                    <Message
+                                                        key={replyDoc.id}
+                                                        message={replyDoc.data().message}
+                                                        timestamp={replyDoc.data().timestamp}
+                                                        user={replyDoc.data().user}
+                                                        userImage={replyDoc.data().userImage}
+                                                        channelId={roomId}
+                                                        messageId={replyDoc.id}
+                                                        isThread={true}
+                                                    />
+                                                </ReplyContainer>
                                             ))}
                                     </React.Fragment>
                                 );
@@ -154,4 +156,10 @@ const ChatContainer = styled.div`
     flex-grow: 1;
     overflow-y: scroll;
     margin-top: 131px;
+`;
+
+const ReplyContainer = styled.div`
+    margin-left: 50px;
+    border-left: 2px solid #ccc;
+    padding-left: 10px;
 `;

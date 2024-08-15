@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { doc} from 'firebase/firestore';
 
-function Message({ message, timestamp, user, userImage, onReply, messageId, isThread }) {
+function Message({ message, timestamp, user, userImage, onReply, isThread}) {
     const handleReply = () => {
         if (onReply) {
             onReply(doc.id);  // onReply が渡されている場合に呼び出す
@@ -12,7 +12,7 @@ function Message({ message, timestamp, user, userImage, onReply, messageId, isTh
         }
     };
     return (
-        <MessageContainer>
+        <MessageContainer isThread={isThread}>
             <img src={userImage} alt="" />
             <MessageInfo>
                 <h4>
@@ -20,7 +20,7 @@ function Message({ message, timestamp, user, userImage, onReply, messageId, isTh
                     <span>{new Date(timestamp?.toDate()).toUTCString()}</span>
                 </h4>
                 <p>{message}</p>
-                <ReplyButton onClick={handleReply}>Reply</ReplyButton>
+                {!isThread && <ReplyButton onClick={onReply}>Reply</ReplyButton>}
             </MessageInfo>
         </MessageContainer>
     );
@@ -32,7 +32,7 @@ const MessageContainer = styled.div`
     display: flex;
     align-items: center;
     padding: 20px;
-    position: relative;
+    margin-left: ${({ isThread }) => (isThread ? '50px' : '0')};
 
     > img {
         height: 50px;
@@ -41,16 +41,16 @@ const MessageContainer = styled.div`
 `;
 
 const MessageInfo = styled.div`
-    margin-left: 10px;
+    position: relative;
 `;
 
 const ReplyButton = styled.button`
-    margin-top: 10px;
-    background-color: #007bff;
-    color: white;
+    position: absolute;
+    right: 0;
+    bottom: -10px;
+    background: none;
     border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
+    color: blue;
     cursor: pointer;
 
     &:hover {
