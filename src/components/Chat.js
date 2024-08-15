@@ -1,75 +1,103 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined"
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined"
+import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined";
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import { useSelector } from "react-redux";
-import { selectRoomId } from "../features/appSlice"
-import ChatInput from "./ChatInput"
+import { selectRoomId } from "../features/appSlice";
+import ChatInput from "./ChatInput";
 import { useCollection, useDocument } from "react-firebase-hooks/firestore";
 import { db } from '../firebase';
 import { collection, doc, orderBy, query } from 'firebase/firestore';
-import Message from "./Message"
+import Message from "./Message";
 
 function Chat() {
     const chatRef = useRef(null);
     const roomId = useSelector(selectRoomId);
-    const [roomDetails] = useDocument(
-        roomId && doc(db, 'rooms', roomId)
-    );
+    const [roomDetails] = useDocument(roomId && doc(db, 'rooms', roomId));
     const [roomMessages, loading] = useCollection(
-        roomId && 
+        roomId &&
         query(
             collection(doc(db, 'rooms', roomId), 'messages'),
             orderBy('timestamp', 'asc')
         )
     );
 
+    const [replyingTo, setReplyingTo] = useState(null);
+
     useEffect(() => {
         chatRef?.current?.scrollIntoView({
             behavior: "smooth",
         });
-    }, [roomId, loading])
+    }, [roomId, loading]);
+
+    const handleReply = (messageId) => {
+        setReplyingTo(messageId); // リプライ対象のメッセージIDを設定
+    };
 
     return (
         <ChatContainer>
             {roomDetails && roomMessages && (
                 <>
-                <Header>
-                    <HeaderLeft>
-                        <h4>
-                            <strong>#{roomDetails?.data().name}</strong>
-                        </h4>
-                        <StarBorderOutlinedIcon />
-                    </HeaderLeft>
-    
-                    <HeaderRight>
-                        <p>
-                            <InfoOutlinedIcon />Details
-                        </p>
-                    </HeaderRight>
-                </Header>
-    
+                    <Header>
+                        <HeaderLeft>
+                            <h4>
+                                <strong>#{roomDetails?.data().name}</strong>
+                            </h4>
+                            <StarBorderOutlinedIcon />
+                        </HeaderLeft>
+
+                        <HeaderRight>
+                            <p>
+                                <InfoOutlinedIcon />Details
+                            </p>
+                        </HeaderRight>
+                    </Header>
+
                     <ChatMessages>
                         {roomMessages?.docs.map(doc => {
-                            const { message, timestamp, user, userImage } = doc.data();
-    
-                            return (
-                                <Message 
-                                    key={doc.id}
-                                    message={message}
-                                    timestamp={timestamp}
-                                    user={user}
-                                    userImage={userImage}
-                                />
-                            );
+                            const { message, timestamp, user, userImage, parentMessageId } = doc.data();
+
+                            // 親メッセージとリプライメッセージを区別して表示
+                            if (!parentMessageId) {
+                                return (
+                                    <React.Fragment key={doc.id}>
+                                        <Message
+                                            message={message}
+                                            timestamp={timestamp}
+                                            user={user}
+                                            userImage={userImage}
+                                            channelId={roomId}
+                                            messageId={doc.id}
+                                            onReply={() => handleReply(doc.id)} // リプライボタンのコールバック
+                                        />
+                                        {/* リプライメッセージの表示 */}
+                                        {roomMessages?.docs
+                                            .filter(replyDoc => replyDoc.data().parentMessageId === doc.id)
+                                            .map(replyDoc => (
+                                                <Message
+                                                    key={replyDoc.id}
+                                                    message={replyDoc.data().message}
+                                                    timestamp={replyDoc.data().timestamp}
+                                                    user={replyDoc.data().user}
+                                                    userImage={replyDoc.data().userImage}
+                                                    channelId={roomId}
+                                                    messageId={replyDoc.id}
+                                                    isThread={true}
+                                                />
+                                            ))}
+                                    </React.Fragment>
+                                );
+                            }
+                            return null;
                         })}
                         <ChatBottom ref={chatRef} />
                     </ChatMessages>
-    
+
                     <ChatInput 
                         chatRef={chatRef}
                         channelName={roomDetails?.data().name}
                         channelId={roomId}
+                        parentMessageId={replyingTo} // リプライ対象のメッセージIDを渡す
                     />
                 </>
             )}
@@ -77,22 +105,20 @@ function Chat() {
     );
 }
 
-export default Chat
+export default Chat;
 
 const ChatBottom = styled.div`
-    padding-bottom = 200px;
-`
-
-const Header = styled.div`
-display: flex;
-justify-content: space-between;
-padding: 20px;
-border-bottom: 1px solid lightgray;
+    padding-bottom: 200px;
 `;
 
-const ChatMessages = styled.div`
+const Header = styled.div`
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid lightgray;
+`;
 
-`
+const ChatMessages = styled.div``;
 
 const HeaderLeft = styled.div`
     display: flex;
@@ -127,6 +153,5 @@ const ChatContainer = styled.div`
     flex: 0.7;
     flex-grow: 1;
     overflow-y: scroll;
-    margin-top: 50px;
+    margin-top: 131px;
 `;
-

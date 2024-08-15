@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button } from "@material-ui/core";
 import { db, auth } from '../firebase';
 import { collection, doc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useAuthState } from "react-firebase-hooks/auth"
+import { useAuthState } from "react-firebase-hooks/auth";
 
-function ChatInput({ channelName, channelId, chatRef }) {
+function ChatInput({ channelName, channelId, chatRef, parentMessageId }) {
     const [input, setInput] = useState('');
     const [user] = useAuthState(auth);
 
@@ -13,25 +13,22 @@ function ChatInput({ channelName, channelId, chatRef }) {
         e.preventDefault();
 
         if (!channelId) {
-            return false
-        }
-
-        if (chatRef == null) {
-            return false
+            return false;
         }
 
         const messagesCollectionRef = collection(doc(db, 'rooms', channelId), 'messages');
-    
-    await addDoc(messagesCollectionRef, {
-        message: input,
-        timestamp: serverTimestamp(),
-        user: user?.displayName,
-        userImage: user.photoURL,
-    });
 
-    chatRef?.current?.scrollIntoView({
-        behavior: "smooth",
-    });
+        await addDoc(messagesCollectionRef, {
+            message: input,
+            timestamp: serverTimestamp(),
+            user: user?.displayName,
+            userImage: user.photoURL,
+            parentMessageId: parentMessageId || null,  // 返信元メッセージIDを追加
+        });
+
+        chatRef?.current?.scrollIntoView({
+            behavior: "smooth",
+        });
 
         setInput("");
     };
@@ -40,15 +37,16 @@ function ChatInput({ channelName, channelId, chatRef }) {
         <ChatInputContainer>
             <form>
                 <input 
-                value={input} 
-                onChange={e => setInput(e.target.value)}
-                placeholder={`Message #${channelName}`} />
+                    value={input} 
+                    onChange={e => setInput(e.target.value)}
+                    placeholder={`Message #${channelName}`} 
+                />
                 <Button hidden type='submit' onClick={sendMessage}>
                     SEND
                 </Button>
             </form>
         </ChatInputContainer>
-    )
+    );
 }
 
 export default ChatInput;
@@ -75,4 +73,4 @@ const ChatInputContainer = styled.div`
     > form > button {
         display: none !important;
     }
-`
+`;
