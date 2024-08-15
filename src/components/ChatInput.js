@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Button } from "@material-ui/core";
 import { db, auth } from '../firebase';
 import { collection, doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuthState } from "react-firebase-hooks/auth";
 
-function ChatInput({ channelName, channelId, chatRef, parentMessageId }) {
+function ChatInput({ channelName, channelId, chatRef, parentMessage }) {
     const [input, setInput] = useState('');
     const [user] = useAuthState(auth);
+
+    useEffect(() => {
+        if (parentMessage) {
+            setInput(``); 
+        } else {
+            setInput(''); // 初期状態に戻す
+        }
+    }, [parentMessage]);
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -22,15 +30,15 @@ function ChatInput({ channelName, channelId, chatRef, parentMessageId }) {
             message: input,
             timestamp: serverTimestamp(),
             user: user?.displayName,
-            userImage: user.photoURL,
-            parentMessageId: parentMessageId || null,  // 返信元メッセージIDを追加
+            userImage: user?.photoURL,
+            parentMessageId: parentMessage?.messageId || null, // リプライ対象メッセージIDを設定
         });
 
         chatRef?.current?.scrollIntoView({
             behavior: "smooth",
         });
 
-        setInput("");
+        setInput(""); // 入力フィールドをクリア
     };
 
     return (
@@ -39,11 +47,14 @@ function ChatInput({ channelName, channelId, chatRef, parentMessageId }) {
                 <input 
                     value={input} 
                     onChange={e => setInput(e.target.value)}
-                    placeholder={`Message #${channelName}`} 
+                    placeholder={parentMessage 
+                        ? `Replying to: "${parentMessage.message}"`
+                        : `Message #${channelName}`} 
                 />
                 <Button hidden type='submit' onClick={sendMessage}>
                     SEND
                 </Button>
+                {parentMessage && <Button onClick={() => setInput('')}>Cancel</Button>}
             </form>
         </ChatInputContainer>
     );

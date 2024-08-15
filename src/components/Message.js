@@ -1,16 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { doc} from 'firebase/firestore';
-
-function Message({ message, timestamp, user, userImage, onReply, isThread}) {
+function Message({ message, timestamp, user, userImage, onReply, messageId, isThread }) {
     const handleReply = () => {
+        console.log('Reply button clicked for message:', messageId); // デバッグ用
         if (onReply) {
-            onReply(doc.id);  // onReply が渡されている場合に呼び出す
-        }else {
+            onReply(messageId);  // messageId を渡して onReply を呼び出す
+        } else {
             console.error('onReply is not a function');
         }
     };
+
     return (
         <MessageContainer isThread={isThread}>
             <img src={userImage} alt="" />
@@ -20,7 +20,7 @@ function Message({ message, timestamp, user, userImage, onReply, isThread}) {
                     <span>{new Date(timestamp?.toDate()).toUTCString()}</span>
                 </h4>
                 <p>{message}</p>
-                {!isThread && <ReplyButton onClick={onReply}>Reply</ReplyButton>}
+                {onReply && <ReplyButton onClick={handleReply}>Reply</ReplyButton>}
             </MessageInfo>
         </MessageContainer>
     );
@@ -32,7 +32,10 @@ const MessageContainer = styled.div`
     display: flex;
     align-items: center;
     padding: 20px;
-    margin-left: ${({ isThread }) => (isThread ? '50px' : '0')};
+    position: relative;
+    margin-left: ${(props) => (props.isThread ? '50px' : '0')};
+    border-left: ${(props) => (props.isThread ? '2px solid #ccc' : 'none')};
+    background-color: ${(props) => (props.isThread ? '#f1f1f1' : 'white')};
 
     > img {
         height: 50px;
@@ -41,16 +44,16 @@ const MessageContainer = styled.div`
 `;
 
 const MessageInfo = styled.div`
-    position: relative;
+    margin-left: 10px;
 `;
 
 const ReplyButton = styled.button`
-    position: absolute;
-    right: 0;
-    bottom: -10px;
-    background: none;
+    margin-top: 10px;
+    background-color: #007bff;
+    color: white;
     border: none;
-    color: blue;
+    border-radius: 5px;
+    padding: 5px 10px;
     cursor: pointer;
 
     &:hover {

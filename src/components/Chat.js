@@ -31,7 +31,12 @@ function Chat() {
     }, [roomId, loading]);
 
     const handleReply = (messageId) => {
-        setReplyingTo(messageId); // リプライ対象のメッセージIDを設定
+        const replyMessage = roomMessages?.docs.find(doc => doc.id === messageId)?.data();
+        if (replyingTo?.messageId === messageId) {
+            setReplyingTo(null);
+        } else {
+            setReplyingTo({ messageId, message: replyMessage?.message });
+        }
     };
 
     return (
@@ -69,6 +74,7 @@ function Chat() {
                                             channelId={roomId}
                                             messageId={doc.id}
                                             onReply={() => handleReply(doc.id)} // リプライボタンのコールバック
+                                            isReplying={replyingTo?.messageId === doc.id}
                                         />
                                         {/* リプライメッセージの表示 */}
                                         {roomMessages?.docs
@@ -76,7 +82,6 @@ function Chat() {
                                             .map(replyDoc => (
                                                 <ReplyContainer key={replyDoc.id}>
                                                     <Message
-                                                        key={replyDoc.id}
                                                         message={replyDoc.data().message}
                                                         timestamp={replyDoc.data().timestamp}
                                                         user={replyDoc.data().user}
@@ -99,7 +104,8 @@ function Chat() {
                         chatRef={chatRef}
                         channelName={roomDetails?.data().name}
                         channelId={roomId}
-                        parentMessageId={replyingTo} // リプライ対象のメッセージIDを渡す
+                        parentMessage={replyingTo} // リプライ対象のメッセージを渡す
+                        isReplying={!!replyingTo} // リプライ中かどうか
                     />
                 </>
             )}
