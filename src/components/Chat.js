@@ -25,18 +25,23 @@ function Chat() {
     const [replyingTo, setReplyingTo] = useState(null);
 
     useEffect(() => {
-        chatRef?.current?.scrollIntoView({
-            behavior: "smooth",
-        });
-    }, [roomId, loading]);
+        if (!replyingTo) {
+            chatRef?.current?.scrollIntoView({
+                behavior: "smooth",
+            });
+        }
+    }, [roomId, loading, replyingTo]);
 
     const handleReply = (messageId) => {
-        const replyMessage = roomMessages?.docs.find(doc => doc.id === messageId)?.data();
-        if (replyingTo?.messageId === messageId) {
+        if (replyingTo === messageId) {
             setReplyingTo(null);
         } else {
-            setReplyingTo({ messageId, message: replyMessage?.message });
+            setReplyingTo(messageId);
         }
+    };
+
+    const handleCancelReply = () => {
+        setReplyingTo(null);
     };
 
     return (
@@ -62,7 +67,6 @@ function Chat() {
                         {roomMessages?.docs.map(doc => {
                             const { message, timestamp, user, userImage, parentMessageId } = doc.data();
 
-                            // 親メッセージとリプライメッセージを区別して表示
                             if (!parentMessageId) {
                                 return (
                                     <React.Fragment key={doc.id}>
@@ -73,15 +77,15 @@ function Chat() {
                                             userImage={userImage}
                                             channelId={roomId}
                                             messageId={doc.id}
-                                            onReply={() => handleReply(doc.id)} // リプライボタンのコールバック
-                                            isReplying={replyingTo?.messageId === doc.id}
+                                            onReply={() => handleReply(doc.id)}
+                                            isReplying={replyingTo === doc.id}
                                         />
-                                        {/* リプライメッセージの表示 */}
                                         {roomMessages?.docs
                                             .filter(replyDoc => replyDoc.data().parentMessageId === doc.id)
                                             .map(replyDoc => (
                                                 <ReplyContainer key={replyDoc.id}>
                                                     <Message
+                                                        key={replyDoc.id}
                                                         message={replyDoc.data().message}
                                                         timestamp={replyDoc.data().timestamp}
                                                         user={replyDoc.data().user}
@@ -104,8 +108,8 @@ function Chat() {
                         chatRef={chatRef}
                         channelName={roomDetails?.data().name}
                         channelId={roomId}
-                        parentMessage={replyingTo} // リプライ対象のメッセージを渡す
-                        isReplying={!!replyingTo} // リプライ中かどうか
+                        parentMessage={replyingTo ? roomMessages.docs.find(doc => doc.id === replyingTo).data() : null}
+                        onCancelReply={handleCancelReply}
                     />
                 </>
             )}

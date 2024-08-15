@@ -78,8 +78,10 @@ const SidebarContainer = styled.div`
     background-color: var(--slack-color);
     flex: 0.3;
     border-top: 1px solid #49274b;
-    max-width: 260px;
-    margin-top: 60px;
+    width: var(--sidebar-width, 31%); /* サイドバーの幅を動的に設定 */
+    min-width: 200px; /* 最小幅を設定 */
+    max-width: 300px; /* 最大幅を設定 */
+    margin-top: 80px;
     height: 100vh;
     overflow-y: auto;
 
