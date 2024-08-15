@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-function Message({ message, timestamp, user, userImage, onReply, messageId, isThread }) {
+function Message({ message, timestamp, user,isAnonymous, channelType userImage, onReply, messageId, isThread }) {
     const handleReply = () => {
         console.log('Reply button clicked for message:', messageId); // デバッグ用
         if (onReply) {
@@ -13,20 +13,21 @@ function Message({ message, timestamp, user, userImage, onReply, messageId, isTh
 
     return (
         <MessageContainer isThread={isThread}>
-            <img src={userImage} alt="" />
+            <img src={ isAnonymous ? '' : userImage} alt="" />
             <MessageInfo>
                 <h4>
-                    {user}
+                    { isAnonymous ? '' : user }
                     <span>{new Date(timestamp?.toDate()).toUTCString()}</span>
                 </h4>
                 <p>{message}</p>
                 {onReply && <ReplyButton onClick={handleReply}>Reply</ReplyButton>}
+
             </MessageInfo>
         </MessageContainer>
     );
 }
 
-export default Message;
+export default Message; 
 
 const MessageContainer = styled.div`
     display: flex;
@@ -41,6 +42,11 @@ const MessageContainer = styled.div`
         height: 50px;
         border-radius: 8px;
     }
+
+    ${({ channelType }) => channelType === 'private' && `
+        background-color: #f5f5f5; /* Example style for private messages */
+        border-left: 5px solid #ccc;
+    `}
 `;
 
 const MessageInfo = styled.div`

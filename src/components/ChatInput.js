@@ -20,6 +20,21 @@ function ChatInput({ chatRef, channelName, channelId, parentMessage, onCancelRep
         if (onCancelReply) {
             onCancelReply(); // リプライキャンセル処理
         }
+
+        const messagesCollectionRef = collection(doc(db, 'rooms', channelId), 'messages');
+    
+    await addDoc(messagesCollectionRef, {
+        message: input,
+        timestamp: serverTimestamp(),
+        user: user?.displayName, 
+        userImage: user.photoURL,
+    });
+
+    chatRef?.current?.scrollIntoView({
+        behavior: "smooth",
+    });
+
+        setInput("");
     };
 
     return (

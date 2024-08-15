@@ -18,6 +18,7 @@ import { db, auth } from '../firebase';
 import { collection } from 'firebase/firestore';
 import { useAuthState } from "react-firebase-hooks/auth";
 
+
 function Sidebar() {
     const [channels] = useCollection(collection(db, "rooms"));
     const [user] = useAuthState(auth);
@@ -64,7 +65,9 @@ function Sidebar() {
                     key={doc.id} 
                     id={doc.id} 
                     title={doc.data().name}
-                />
+                    isAnonymous={doc.data().isAnonymous}
+                    channelType={doc.data().channelType}
+            />
             ))}
             
         </SidebarContainer>

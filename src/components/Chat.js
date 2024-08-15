@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState, useRef, useEffect } fro
 import styled from 'styled-components';
 import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
@@ -43,10 +44,15 @@ function Chat() {
     const handleCancelReply = () => {
         setReplyingTo(null);
     };
+  
+  
+  
+    // デフォルト値を設定し、roomDetails が null または undefined の場合に備える
+    const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
 
     return (
         <ChatContainer>
-            {roomDetails && roomMessages && (
+            {roomDetails && roomMessages ? (
                 <>
                     <Header>
                         <HeaderLeft>
@@ -77,6 +83,7 @@ function Chat() {
                                             userImage={userImage}
                                             channelId={roomId}
                                             messageId={doc.id}
+                                            isAnonymous={isAnonymous}
                                             onReply={() => handleReply(doc.id)}
                                             isReplying={replyingTo === doc.id}
                                         />
@@ -112,6 +119,8 @@ function Chat() {
                         onCancelReply={handleCancelReply}
                     />
                 </>
+            ) : (
+                <p>Loading...</p> 
             )}
         </ChatContainer>
     );
@@ -130,8 +139,8 @@ const Header = styled.div`
     border-bottom: 1px solid lightgray;
 `;
 
-const ChatMessages = styled.div``;
 
+const ChatMessages = styled.div``;
 const HeaderLeft = styled.div`
     display: flex;
     align-items: center;
