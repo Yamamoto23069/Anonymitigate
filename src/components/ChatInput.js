@@ -1,23 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Button } from "@material-ui/core";
-import { db, auth } from '../firebase';
-import { collection, doc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useAuthState } from "react-firebase-hooks/auth"
 
-function ChatInput({ channelName, channelId, chatRef }) {
+function ChatInput({ chatRef, channelName, channelId, parentMessage, onCancelReply }) {
     const [input, setInput] = useState('');
-    const [user] = useAuthState(auth);
+    const [replyMessage, setReplyMessage] = useState('');
 
-    const sendMessage = async (e) => {
-        e.preventDefault();
-
-        if (!channelId) {
-            return false
+    useEffect(() => {
+        if (parentMessage) {
+            setReplyMessage(parentMessage.message);
+        } else {
+            setReplyMessage('');
         }
+    }, [parentMessage]);
 
-        if (chatRef == null) {
-            return false
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // メッセージ送信処理を追加する
+        setInput('');
+        if (onCancelReply) {
+            onCancelReply(); // リプライキャンセル処理
         }
 
         const messagesCollectionRef = collection(doc(db, 'rooms', channelId), 'messages');
@@ -37,42 +38,91 @@ function ChatInput({ channelName, channelId, chatRef }) {
     };
 
     return (
-        <ChatInputContainer>
-            <form>
-                <input 
-                value={input} 
-                onChange={e => setInput(e.target.value)}
-                placeholder={`Message #${channelName}`} />
-                <Button hidden type='submit' onClick={sendMessage}>
-                    SEND
-                </Button>
-            </form>
-        </ChatInputContainer>
-    )
+        <>
+            {parentMessage && (
+                <ReplyInfoContainer>
+                    <ReplyInfo>
+                        Replying to: <strong>{replyMessage}</strong>
+                        <CancelButton onClick={onCancelReply}>Cancel</CancelButton>
+                    </ReplyInfo>
+                </ReplyInfoContainer>
+            )}
+            <ChatInputContainer>
+                <form onSubmit={handleSubmit}>
+                    <InputField
+                        type="text"
+                        placeholder={parentMessage ? `Replying to: ${replyMessage}` : `Message #${channelName}`}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                    />
+                    <SubmitButton type="submit">Send</SubmitButton>
+                </form>
+            </ChatInputContainer>
+        </>
+    );
 }
 
 export default ChatInput;
 
+const ReplyInfoContainer = styled.div`
+    position: fixed;
+    bottom: 50px;
+    left: var(--sidebar-width, 31%);
+    width: calc(100% - var(--sidebar-width, 31%));
+    background-color: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid lightgray;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+`;
+
+const ReplyInfo = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const CancelButton = styled.button`
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover {
+        text-decoration: underline;
+    }
+`;
+
 const ChatInputContainer = styled.div`
-    border-radius: 20px;
+    position: fixed;
+    left: var(--sidebar-width, 31%);
+    width: calc(100% - var(--sidebar-width, 31%));
+    bottom: 0;
+    background-color: white;
+    border-top: 1px solid lightgray;
+    padding: 10px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+`;
 
-    > form {
-        position: relative;
-        display: flex;
-        justify-content: center;
-    }
+const InputField = styled.input`
+    width: calc(100% - 90px);
+    padding: 10px;
+    border: 1px solid lightgray;
+    border-radius: 4px;
+    margin-right: 10px;
+`;
 
-    > form > input {
-        position: fixed;
-        bottom: 30px;
-        width: 60%;
-        border: 1px solid gray;
-        border-radius: 3px;
-        padding: 20px;
-        outline: none;
-    }
+const SubmitButton = styled.button`
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
 
-    > form > button {
-        display: none !important;
+    &:hover {
+        background-color: #0056b3;
     }
-`
+`;

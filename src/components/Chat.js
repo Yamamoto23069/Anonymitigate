@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+
+import React, { useState, useRef, useEffect } fro
 import styled from 'styled-components';
 import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
@@ -13,9 +14,7 @@ import Message from "./Message";
 function Chat() {
     const chatRef = useRef(null);
     const roomId = useSelector(selectRoomId);
-    const [roomDetails] = useDocument(
-        roomId && doc(db, 'rooms', roomId)
-    );
+    const [roomDetails] = useDocument(roomId && doc(db, 'rooms', roomId));
     const [roomMessages, loading] = useCollection(
         roomId &&
         query(
@@ -24,12 +23,30 @@ function Chat() {
         )
     );
 
-    useEffect(() => {
-        chatRef?.current?.scrollIntoView({
-            behavior: "smooth",
-        });
-    }, [roomId, loading]);
+    const [replyingTo, setReplyingTo] = useState(null);
 
+    useEffect(() => {
+        if (!replyingTo) {
+            chatRef?.current?.scrollIntoView({
+                behavior: "smooth",
+            });
+        }
+    }, [roomId, loading, replyingTo]);
+
+    const handleReply = (messageId) => {
+        if (replyingTo === messageId) {
+            setReplyingTo(null);
+        } else {
+            setReplyingTo(messageId);
+        }
+    };
+
+    const handleCancelReply = () => {
+        setReplyingTo(null);
+    };
+  
+  
+  
     // デフォルト値を設定し、roomDetails が null または undefined の場合に備える
     const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
 
@@ -54,26 +71,52 @@ function Chat() {
 
                     <ChatMessages>
                         {roomMessages?.docs.map(doc => {
-                            const { message, timestamp, user, userImage } = doc.data();
+                            const { message, timestamp, user, userImage, parentMessageId } = doc.data();
+
+                            if (!parentMessageId) {
                                 return (
-                                    <Message
-                                        key={doc.id}
-                                        message={message}
-                                        timestamp={timestamp}
-                                        user={user}
-                                        isAnonymous={isAnonymous}
-                                        userImage={userImage}
-                                    />
+                                    <React.Fragment key={doc.id}>
+                                        <Message
+                                            message={message}
+                                            timestamp={timestamp}
+                                            user={user}
+                                            userImage={userImage}
+                                            channelId={roomId}
+                                            messageId={doc.id}
+                                            isAnonymous={isAnonymous}
+                                            onReply={() => handleReply(doc.id)}
+                                            isReplying={replyingTo === doc.id}
+                                        />
+                                        {roomMessages?.docs
+                                            .filter(replyDoc => replyDoc.data().parentMessageId === doc.id)
+                                            .map(replyDoc => (
+                                                <ReplyContainer key={replyDoc.id}>
+                                                    <Message
+                                                        key={replyDoc.id}
+                                                        message={replyDoc.data().message}
+                                                        timestamp={replyDoc.data().timestamp}
+                                                        user={replyDoc.data().user}
+                                                        userImage={replyDoc.data().userImage}
+                                                        channelId={roomId}
+                                                        messageId={replyDoc.id}
+                                                        isThread={true}
+                                                    />
+                                                </ReplyContainer>
+                                            ))}
+                                    </React.Fragment>
                                 );
                             }
-                        )}
+                            return null;
+                        })}
                         <ChatBottom ref={chatRef} />
                     </ChatMessages>
 
-                    <ChatInput
+                    <ChatInput 
                         chatRef={chatRef}
                         channelName={roomDetails?.data().name}
                         channelId={roomId}
+                        parentMessage={replyingTo ? roomMessages.docs.find(doc => doc.id === replyingTo).data() : null}
+                        onCancelReply={handleCancelReply}
                     />
                 </>
             ) : (
@@ -96,9 +139,8 @@ const Header = styled.div`
     border-bottom: 1px solid lightgray;
 `;
 
-const ChatMessages = styled.div`
-`;
 
+const ChatMessages = styled.div``;
 const HeaderLeft = styled.div`
     display: flex;
     align-items: center;
@@ -132,5 +174,11 @@ const ChatContainer = styled.div`
     flex: 0.7;
     flex-grow: 1;
     overflow-y: scroll;
-    margin-top: 50px;
+    margin-top: 131px;
+`;
+
+const ReplyContainer = styled.div`
+    margin-left: 50px;
+    border-left: 2px solid #ccc;
+    padding-left: 10px;
 `;
