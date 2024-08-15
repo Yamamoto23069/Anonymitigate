@@ -15,8 +15,10 @@ import SidebarOption from './SidebarOption';
 import AddIcon from "@material-ui/icons/Add";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { db, auth } from '../firebase';
+
 import { collection } from 'firebase/firestore';
 import { useAuthState } from "react-firebase-hooks/auth";
+
 
 function Sidebar() {
     const [channels] = useCollection(collection(db, "rooms"));
@@ -51,24 +53,16 @@ function Sidebar() {
             <SidebarOption Icon={ExpandLessIcon} title="Show less" />
             <hr />
             <SidebarOption 
-                Icon={showChannels ? ExpandLessIcon : ExpandMoreIcon}
-                title="Channels" 
-                onClick={toggleChannelsVisibility} 
+            key={doc.id} 
+            id={doc.id} 
+            title={doc.data().name}
+            isAnonymous={doc.data().isAnonymous}
+            channelType={doc.data().channelType}
             />
-            <hr />
-            <SidebarOption Icon={AddIcon} addChannelOption title="Add Channel" />
-
-            {/* チャンネルリストの表示 */}
-            {showChannels && channels?.docs.map(doc => (
-                <SidebarOption 
-                    key={doc.id} 
-                    id={doc.id} 
-                    title={doc.data().name}
-                />
-            ))}
-            
-        </SidebarContainer>
-    );
+        ))} 
+        
+    </SidebarContainer>
+  );
 }
 
 export default Sidebar;
