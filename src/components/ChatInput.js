@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { db, auth } from '../firebase';
+import { collection, doc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 function ChatInput({ chatRef, channelName, channelId, parentMessage, onCancelReply }) {
     const [input, setInput] = useState('');
     const [replyMessage, setReplyMessage] = useState('');
+    const [user] = useAuthState(auth);
 
     useEffect(() => {
         if (parentMessage) {
@@ -13,28 +17,25 @@ function ChatInput({ chatRef, channelName, channelId, parentMessage, onCancelRep
         }
     }, [parentMessage]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // メッセージ送信処理を追加する
-        setInput('');
-        if (onCancelReply) {
-            onCancelReply(); // リプライキャンセル処理
+        if (input.trim()) {
+            // メッセージ送信処理を追加する
+            await addDoc(collection(doc(db, 'rooms', channelId), 'messages'), {
+                message: input,
+                timestamp: serverTimestamp(),
+                user: user?.displayName, 
+                userImage: user?.photoURL,
+                parentMessageId: parentMessage?.messageId || null // リプライの場合、親メッセージIDを設定
+            });
+            
+
+            setInput('');
+            if (onCancelReply) {
+                onCancelReply(); // リプライキャンセル処理
+            }
+
         }
-
-        const messagesCollectionRef = collection(doc(db, 'rooms', channelId), 'messages');
-    
-    await addDoc(messagesCollectionRef, {
-        message: input,
-        timestamp: serverTimestamp(),
-        user: user?.displayName, 
-        userImage: user.photoURL,
-    });
-
-    chatRef?.current?.scrollIntoView({
-        behavior: "smooth",
-    });
-
-        setInput("");
     };
 
     return (
@@ -66,7 +67,7 @@ export default ChatInput;
 
 const ReplyInfoContainer = styled.div`
     position: fixed;
-    bottom: 50px;
+    bottom: 60px; /* Adjusted for better placement */
     left: var(--sidebar-width, 31%);
     width: calc(100% - var(--sidebar-width, 31%));
     background-color: rgba(255, 255, 255, 0.9);
@@ -97,8 +98,8 @@ const CancelButton = styled.button`
 const ChatInputContainer = styled.div`
     position: fixed;
     left: var(--sidebar-width, 31%);
-    width: calc(100% - var(--sidebar-width, 31%));
     bottom: 0;
+    width: calc(100% - var(--sidebar-width, 35%));
     background-color: white;
     border-top: 1px solid lightgray;
     padding: 10px;
@@ -106,8 +107,9 @@ const ChatInputContainer = styled.div`
     z-index: 10;
 `;
 
+
 const InputField = styled.input`
-    width: calc(100% - 90px);
+    width: calc(100% - 100px);
     padding: 10px;
     border: 1px solid lightgray;
     border-radius: 4px;

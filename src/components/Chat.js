@@ -1,5 +1,4 @@
-
-import React, { useState, useRef, useEffect } fro
+import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
@@ -24,14 +23,27 @@ function Chat() {
     );
 
     const [replyingTo, setReplyingTo] = useState(null);
+    const [justReplied, setJustReplied] = useState(false);
+    
+    useEffect(() => {
+        // リプライが設定されたときにフラグを立てる
+        if (replyingTo) {
+            setJustReplied(true);
+        }
+    }, [replyingTo]);
 
     useEffect(() => {
-        if (!replyingTo) {
+        // loading が完了し、かつリプライが解除されたときにフラグが立っていなければスクロール
+        if (!replyingTo && !justReplied) {
+            console.log('Scrolling into view because replyingTo is null and roomMessages are not empty'); // デバッグ用
             chatRef?.current?.scrollIntoView({
                 behavior: "smooth",
             });
         }
-    }, [roomId, loading, replyingTo]);
+        if (!replyingTo) {
+            setJustReplied(false);
+        }
+    }, [roomId, roomMessages, loading, replyingTo, justReplied]);
 
     const handleReply = (messageId) => {
         if (replyingTo === messageId) {
@@ -42,12 +54,11 @@ function Chat() {
     };
 
     const handleCancelReply = () => {
+        console.log('handleCancelReply called, resetting replyingTo');
         setReplyingTo(null);
     };
-  
-  
-  
-    // デフォルト値を設定し、roomDetails が null または undefined の場合に備える
+    
+
     const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
 
     return (
@@ -92,7 +103,6 @@ function Chat() {
                                             .map(replyDoc => (
                                                 <ReplyContainer key={replyDoc.id}>
                                                     <Message
-                                                        key={replyDoc.id}
                                                         message={replyDoc.data().message}
                                                         timestamp={replyDoc.data().timestamp}
                                                         user={replyDoc.data().user}
@@ -139,8 +149,8 @@ const Header = styled.div`
     border-bottom: 1px solid lightgray;
 `;
 
-
 const ChatMessages = styled.div``;
+
 const HeaderLeft = styled.div`
     display: flex;
     align-items: center;
@@ -181,4 +191,8 @@ const ReplyContainer = styled.div`
     margin-left: 50px;
     border-left: 2px solid #ccc;
     padding-left: 10px;
+    background-color: #f9f9f9;
+    margin-top: 10px;
+    padding-top: 10px;
 `;
+

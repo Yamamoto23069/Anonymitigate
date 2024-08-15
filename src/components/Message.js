@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-function Message({ message, timestamp, user,isAnonymous, channelType userImage, onReply, messageId, isThread }) {
+function Message({ message, timestamp, user, isAnonymous, channelType, userImage, onReply, messageId, isThread }) {
     const handleReply = () => {
         console.log('Reply button clicked for message:', messageId); // デバッグ用
         if (onReply) {
@@ -12,45 +12,63 @@ function Message({ message, timestamp, user,isAnonymous, channelType userImage, 
     };
 
     return (
-        <MessageContainer isThread={isThread}>
-            <img src={ isAnonymous ? '' : userImage} alt="" />
+        <MessageContainer isThread={isThread} channelType={channelType}>
+            {!isAnonymous && <UserImage src={userImage} alt={`${user}'s avatar`} />}
             <MessageInfo>
                 <h4>
-                    { isAnonymous ? '' : user }
-                    <span>{new Date(timestamp?.toDate()).toUTCString()}</span>
+                    {!isAnonymous && <span>{user}</span>}
+                    <span>{new Date(timestamp?.toDate()).toLocaleString()}</span>
                 </h4>
                 <p>{message}</p>
                 {onReply && <ReplyButton onClick={handleReply}>Reply</ReplyButton>}
-
             </MessageInfo>
         </MessageContainer>
     );
 }
 
-export default Message; 
+export default Message;
 
 const MessageContainer = styled.div`
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     padding: 20px;
     position: relative;
     margin-left: ${(props) => (props.isThread ? '50px' : '0')};
     border-left: ${(props) => (props.isThread ? '2px solid #ccc' : 'none')};
-    background-color: ${(props) => (props.isThread ? '#f1f1f1' : 'white')};
+    background-color: ${(props) => (props.isThread ? '#f1f1f1' : props.channelType === 'private' ? '#f5f5f5' : 'white')};
 
-    > img {
-        height: 50px;
-        border-radius: 8px;
+    &:hover {
+        background-color: ${(props) => (props.isThread ? '#e0e0e0' : '#f9f9f9')};
     }
+`;
 
-    ${({ channelType }) => channelType === 'private' && `
-        background-color: #f5f5f5; /* Example style for private messages */
-        border-left: 5px solid #ccc;
-    `}
+const UserImage = styled.img`
+    height: 50px;
+    border-radius: 8px;
+    margin-right: 10px;
 `;
 
 const MessageInfo = styled.div`
-    margin-left: 10px;
+    flex: 1;
+    > h4 {
+        display: flex;
+        justify-content: space-between;
+        margin: 0;
+        font-size: 14px;
+
+        > span {
+            font-weight: bold;
+        }
+
+        > span:last-child {
+            color: gray;
+            font-size: 12px;
+        }
+    }
+
+    > p {
+        margin: 5px 0 0;
+    }
 `;
 
 const ReplyButton = styled.button`

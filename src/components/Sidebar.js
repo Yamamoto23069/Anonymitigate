@@ -82,7 +82,7 @@ const SidebarContainer = styled.div`
     flex: 0.3;
     border-top: 1px solid #49274b;
     width: var(--sidebar-width, 31%); /* サイドバーの幅を動的に設定 */
-    min-width: 200px; /* 最小幅を設定 */
+    min-width: 300px; /* 最小幅を設定 */
     max-width: 300px; /* 最大幅を設定 */
     margin-top: 80px;
     height: 100vh;
