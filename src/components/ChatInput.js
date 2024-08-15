@@ -2,12 +2,29 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { db, auth } from '../firebase';
 import { collection, doc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { translateMessage, translateMessage2 } from './translate'; // Import hàm dịch
+import { getUserLanguage } from './languageStorage'; // Import hàm lấy ngôn ngữ người dùng
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 function ChatInput({ chatRef, channelName, channelId, parentMessage, onCancelReply }) {
     const [input, setInput] = useState('');
     const [replyMessage, setReplyMessage] = useState('');
     const [user] = useAuthState(auth);
+    const [userLanguage, setUserLanguage] = useState('vi');
+
+    useEffect(() => {
+        const fetchUserLanguage = async () => {
+            try {
+                const savedLanguage = await getUserLanguage();
+                if (savedLanguage) {
+                    setUserLanguage(savedLanguage);
+                }
+            } catch (error) {
+                console.error("Error fetching user language:", error);
+            }
+        };
+        fetchUserLanguage();
+    }, [user]);
 
     useEffect(() => {
         if (parentMessage) {
@@ -20,23 +37,39 @@ function ChatInput({ chatRef, channelName, channelId, parentMessage, onCancelRep
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (input.trim()) {
-            // メッセージ送信処理を追加する
-            await addDoc(collection(doc(db, 'rooms', channelId), 'messages'), {
-                message: input,
-                timestamp: serverTimestamp(),
-                user: user?.displayName, 
-                userImage: user?.photoURL,
-                parentMessageId: parentMessage?.messageId || null // リプライの場合、親メッセージIDを設定
-            });
-            
+            try {
+                let translatedMessage = input;
 
-            setInput('');
-            if (onCancelReply) {
-                onCancelReply(); // リプライキャンセル処理
+                if (userLanguage === 'vi') {
+                    // Dịch từ tiếng Việt sang tiếng Nhật
+                    translatedMessage = await translateMessage(input, 'ja');
+                } else if (userLanguage === 'ja') {
+                    // Dịch từ tiếng Nhật sang tiếng Việt
+                    translatedMessage = await translateMessage2(input, 'vi');
+                }
+
+                await addDoc(collection(doc(db, 'rooms', channelId), 'messages'), {
+                    message: input,
+                    message_translate: translatedMessage,
+                    timestamp: serverTimestamp(),
+                    user: user?.displayName,
+                    userImage: user?.photoURL,
+                    parentMessageId: parentMessage?.messageId || null // Set parent message ID if replying
+                });
+
+                setInput('');
+                if (onCancelReply) {
+                    onCancelReply(); // Cancel reply action
+                }
+            } catch (error) {
+                console.error("Error adding document: ", error);
             }
-
         }
     };
+
+    useEffect(() => {
+        chatRef.current.scrollIntoView({ behavior: 'smooth' });
+    }, [chatRef]);
 
     return (
         <>
@@ -106,7 +139,6 @@ const ChatInputContainer = styled.div`
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
     z-index: 10;
 `;
-
 
 const InputField = styled.input`
     width: calc(100% - 100px);
