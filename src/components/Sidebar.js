@@ -15,7 +15,7 @@ import SidebarOption from './SidebarOption';
 import AddIcon from "@material-ui/icons/Add"
 import { useCollection } from "react-firebase-hooks/firestore"
 import { db, auth } from '../firebase';
-import { collection,  } from 'firebase/firestore';
+import { collection, } from 'firebase/firestore';
 import { useAuthState } from "react-firebase-hooks/auth"
 
 function Sidebar() {
