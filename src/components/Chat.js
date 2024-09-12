@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useRef, useEffect } from 'react';
+=======
+import React, { useRef, useEffect, useState } from 'react';
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 import styled from 'styled-components';
 import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
@@ -13,9 +17,7 @@ import Message from "./Message";
 function Chat() {
     const chatRef = useRef(null);
     const roomId = useSelector(selectRoomId);
-    const [roomDetails] = useDocument(
-        roomId && doc(db, 'rooms', roomId)
-    );
+    const [roomDetails] = useDocument(roomId && doc(db, 'rooms', roomId));
     const [roomMessages, loading] = useCollection(
         roomId &&
         query(
@@ -24,11 +26,44 @@ function Chat() {
         )
     );
 
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [justReplied, setJustReplied] = useState(false);
+    
     useEffect(() => {
-        chatRef?.current?.scrollIntoView({
-            behavior: "smooth",
-        });
-    }, [roomId, loading])
+        // リプライが設定されたときにフラグを立てる
+        if (replyingTo) {
+            setJustReplied(true);
+        }
+    }, [replyingTo]);
+
+    useEffect(() => {
+        // loading が完了し、かつリプライが解除されたときにフラグが立っていなければスクロール
+        if (!replyingTo && !justReplied) {
+            console.log('Scrolling into view because replyingTo is null and roomMessages are not empty'); // デバッグ用
+            chatRef?.current?.scrollIntoView({
+                behavior: "smooth",
+            });
+        }
+        if (!replyingTo) {
+            setJustReplied(false);
+        }
+    }, [roomId, roomMessages, loading, replyingTo, justReplied]);
+
+    const handleReply = (messageId) => {
+        if (replyingTo === messageId) {
+            setReplyingTo(null);
+        } else {
+            setReplyingTo(messageId);
+        }
+    };
+
+    const handleCancelReply = () => {
+        console.log('handleCancelReply called, resetting replyingTo');
+        setReplyingTo(null);
+    };
+    
+
+    const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
 
     const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
 
@@ -36,6 +71,7 @@ function Chat() {
         <ChatContainer>
             {roomDetails && roomMessages ? (
                 <>
+<<<<<<< HEAD
                 <Header>
                     <HeaderLeft>
                         <h4>
@@ -71,13 +107,79 @@ function Chat() {
                     </ChatMessages>
     
                     <ChatInput
+=======
+                    <Header>
+                        <HeaderLeft>
+                            <h4>
+                                <strong>#{roomDetails?.data().name}</strong>
+                            </h4>
+                            <StarBorderOutlinedIcon />
+                        </HeaderLeft>
+
+                        <HeaderRight>
+                            <p>
+                                <InfoOutlinedIcon />Details
+                            </p>
+                        </HeaderRight>
+                    </Header>
+
+                    <ChatMessages>
+                        {roomMessages?.docs.map(doc => {
+                            const { message, timestamp, user, userImage, parentMessageId } = doc.data();
+
+                            if (!parentMessageId) {
+                                return (
+                                    <React.Fragment key={doc.id}>
+                                        <Message
+                                            message={message}
+                                            timestamp={timestamp}
+                                            user={user}
+                                            userImage={userImage}
+                                            channelId={roomId}
+                                            messageId={doc.id}
+                                            isAnonymous={isAnonymous}
+                                            onReply={() => handleReply(doc.id)}
+                                            isReplying={replyingTo === doc.id}
+                                        />
+                                        {roomMessages?.docs
+                                            .filter(replyDoc => replyDoc.data().parentMessageId === doc.id)
+                                            .map(replyDoc => (
+                                                <ReplyContainer key={replyDoc.id}>
+                                                    <Message
+                                                        message={replyDoc.data().message}
+                                                        timestamp={replyDoc.data().timestamp}
+                                                        user={replyDoc.data().user}
+                                                        userImage={replyDoc.data().userImage}
+                                                        channelId={roomId}
+                                                        messageId={replyDoc.id}
+                                                        isThread={true}
+                                                    />
+                                                </ReplyContainer>
+                                            ))}
+                                    </React.Fragment>
+                                );
+                            }
+                            return null;
+                        })}
+                        <ChatBottom ref={chatRef} />
+                    </ChatMessages>
+
+                    <ChatInput 
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
                         chatRef={chatRef}
                         channelName={roomDetails?.data().name}
                         channelId={roomId}
+                        parentMessage={replyingTo ? roomMessages.docs.find(doc => doc.id === replyingTo).data() : null}
+                        onCancelReply={handleCancelReply}
                     />
                 </>
+<<<<<<< HEAD
                 ) : (
                     <p>Loading...</p> 
+=======
+            ) : (
+                <p>Loading...</p> 
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
             )}
         </ChatContainer>
     );
@@ -87,6 +189,7 @@ export default Chat;
 
 const ChatBottom = styled.div`
     padding-bottom: 200px;
+<<<<<<< HEAD
 `;
 
 const Header = styled.div`
@@ -94,11 +197,22 @@ display: flex;
 justify-content: space-between;
 padding: 20px;
 border-bottom: 1px solid lightgray;
+=======
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 `;
 
-const ChatMessages = styled.div`
-
+const Header = styled.div`
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid lightgray;
 `;
+
+<<<<<<< HEAD
+`;
+=======
+const ChatMessages = styled.div``;
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 
 const HeaderLeft = styled.div`
     display: flex;
@@ -133,6 +247,15 @@ const ChatContainer = styled.div`
     flex: 0.7;
     flex-grow: 1;
     overflow-y: scroll;
-    margin-top: 50px;
+    margin-top: 131px;
+`;
+
+const ReplyContainer = styled.div`
+    margin-left: 50px;
+    border-left: 2px solid #ccc;
+    padding-left: 10px;
+    background-color: #f9f9f9;
+    margin-top: 10px;
+    padding-top: 10px;
 `;
 

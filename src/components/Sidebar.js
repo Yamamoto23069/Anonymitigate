@@ -18,6 +18,7 @@ import { db, auth } from '../firebase';
 import { collection  } from 'firebase/firestore';
 import { useAuthState } from "react-firebase-hooks/auth"
 
+
 function Sidebar() {
     const [channels] = useCollection(collection(db, "rooms"));
     const [user] = useAuthState(auth);
@@ -56,10 +57,29 @@ function Sidebar() {
             isAnonymous={doc.data().isAnonymous}
             channelType={doc.data().channelType}
             />
+<<<<<<< HEAD
         ))}
         
     </SidebarContainer>
   );
+=======
+            <hr />
+            <SidebarOption Icon={AddIcon} addChannelOption title="Add Channel" />
+
+            {/* チャンネルリストの表示 */}
+            {showChannels && channels?.docs.map(doc => (
+                <SidebarOption 
+                    key={doc.id} 
+                    id={doc.id} 
+                    title={doc.data().name}
+                    isAnonymous={doc.data().isAnonymous}
+                    channelType={doc.data().channelType}
+            />
+            ))}
+            
+        </SidebarContainer>
+    );
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 }
 
 export default Sidebar
@@ -69,8 +89,26 @@ const SidebarContainer = styled.div`
     background-color: var(--slack-color);
     flex: 0.3;
     border-top: 1px solid #49274b;
+<<<<<<< HEAD
     max-width: 260px;
     margin-top: 60px;
+=======
+    width: var(--sidebar-width, 31%); /* サイドバーの幅を動的に設定 */
+    min-width: 300px; /* 最小幅を設定 */
+    max-width: 300px; /* 最大幅を設定 */
+    margin-top: 80px;
+    height: 100vh;
+    overflow-y: auto;
+
+    /* スクロールバーを非表示にするスタイル */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+
+    /* Chrome, Edge, Safari, Opera */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 
     > hr {
         margin-top: 10px;
