@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+import React, { useRef, useEffect } from 'react';
+=======
 import React, { useRef, useEffect, useState } from 'react';
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 import styled from 'styled-components';
 import StarBorderOutlinedIcon from "@material-ui/icons/StarBorderOutlined";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
@@ -61,10 +65,49 @@ function Chat() {
 
     const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
 
+    const { channelType = 'public', members = [], isAnonymous = false } = roomDetails?.data() || {};
+
     return (
         <ChatContainer>
             {roomDetails && roomMessages ? (
                 <>
+<<<<<<< HEAD
+                <Header>
+                    <HeaderLeft>
+                        <h4>
+                            <strong>#{roomDetails?.data().name}</strong>
+                        </h4>
+                        <StarBorderOutlinedIcon />
+                    </HeaderLeft>
+
+                    <HeaderRight>
+                        <p>
+                            <InfoOutlinedIcon />Details
+                        </p>
+                    </HeaderRight>
+                </Header>
+    
+                    <ChatMessages>
+                        {roomMessages?.docs.map(doc => {
+                            const { message, timestamp, user, userImage } = doc.data();
+    
+                            return (
+                                <Message
+                                    key={doc.id}
+                                    message={message}
+                                    timestamp={timestamp}
+                                    user={user}
+                                    isAnonymous={isAnonymous}
+                                    userImage={userImage}
+                                />
+                            );
+                        }
+                    )}
+                    <ChatBottom ref={chatRef} />
+                    </ChatMessages>
+    
+                    <ChatInput
+=======
                     <Header>
                         <HeaderLeft>
                             <h4>
@@ -122,6 +165,7 @@ function Chat() {
                     </ChatMessages>
 
                     <ChatInput 
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
                         chatRef={chatRef}
                         channelName={roomDetails?.data().name}
                         channelId={roomId}
@@ -129,8 +173,13 @@ function Chat() {
                         onCancelReply={handleCancelReply}
                     />
                 </>
+<<<<<<< HEAD
+                ) : (
+                    <p>Loading...</p> 
+=======
             ) : (
                 <p>Loading...</p> 
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
             )}
         </ChatContainer>
     );
@@ -140,6 +189,16 @@ export default Chat;
 
 const ChatBottom = styled.div`
     padding-bottom: 200px;
+<<<<<<< HEAD
+`;
+
+const Header = styled.div`
+display: flex;
+justify-content: space-between;
+padding: 20px;
+border-bottom: 1px solid lightgray;
+=======
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 `;
 
 const Header = styled.div`
@@ -149,7 +208,11 @@ const Header = styled.div`
     border-bottom: 1px solid lightgray;
 `;
 
+<<<<<<< HEAD
+`;
+=======
 const ChatMessages = styled.div``;
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 
 const HeaderLeft = styled.div`
     display: flex;

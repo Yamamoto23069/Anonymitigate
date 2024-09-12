@@ -1,6 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
 
+<<<<<<< HEAD
+function Message({ message, timestamp, user, isAnonymous, userImage, channelType }) {     return (
+        <MessageContainer>
+            <userImage src={ isAnonymous ? "../resources/Anonymitigate_logo.png" : userImage} alt="" />            <MessageInfo>
+            <h4>
+                { isAnonymous ? '' : user }
+                <span>
+                    {new Date(timestamp?.toDate()).toUTCString()}
+                </span>
+            </h4>
+            <p>{message}</p>
+=======
 function Message({ message, timestamp, user, isAnonymous, channelType, userImage, onReply, messageId, isThread }) {
     const handleReply = () => {
         console.log('Reply button clicked for message:', messageId); // デバッグ用
@@ -21,6 +33,7 @@ function Message({ message, timestamp, user, isAnonymous, channelType, userImage
                 </h4>
                 <p>{message}</p>
                 {onReply && <ReplyButton onClick={handleReply}>Reply</ReplyButton>}
+>>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
             </MessageInfo>
         </MessageContainer>
     );
@@ -40,6 +53,11 @@ const MessageContainer = styled.div`
     &:hover {
         background-color: ${(props) => (props.isThread ? '#e0e0e0' : '#f9f9f9')};
     }
+
+    ${({ channelType }) => channelType === 'private' && `
+        background-color: #f5f5f5; /* Example style for private messages */
+        border-left: 5px solid #ccc;
+    `}
 `;
 
 const UserImage = styled.img`
