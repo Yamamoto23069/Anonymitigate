@@ -1,50 +1,109 @@
-<<<<<<< HEAD
-# Getting Started with Create React App and Redux
+# ANONYMITIGATE
+### Table of Contents
+- [English Version](#english-version)
+- [Japanese Version](#japanese-version)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.
+## English Version
+## Chat Application with Automatic Translation and Anonymous Messaging
+This project is a chat application designed to solve communication issues in teams where members speak different languages and may feel shy about contributing in group discussions. It is ideal for environments such as gPBL programs, where students from SIT and HUST collaborate or any collaborative environment where language barriers or social anxieties hinder effective communication.
 
-## Available Scripts
+#### Key Features:
+- **Automatic Translation:** Messages are automatically translated into the recipient's language, reducing the need to manually translate and resend the same message in multiple languages. This enhances the speed of information sharing.
 
-In the project directory, you can run:
+- **Anonymous Messaging:**< Users can send messages anonymously, helping reduce the hesitation or embarrassment of speaking up. This is especially useful for shy members who are less likely to ask questions or contribute in open discussions.
 
-### `npm start`
+#### Problem Solved:
+- **Communication Delay:** By eliminating the manual translation process, the app speeds up communication between team members.
+- **Lack of Participation:** The anonymous feature lowers the psychological barrier, encouraging more frequent and honest interactions within the group.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This app is useful not only for the target users in educational settings but also for broader applications where language and social dynamics might inhibit communication.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation
 
-### `npm test`
+1. Clone the repository from GitHub:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+git clone https://github.com/Yamamoto23069/Anonymitigate.git
+```
+2. Install the required dependencies:
 
-### `npm run build`
+```
+yarn install
+```
+Install the AWS SDK:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+yarn add aws-sdk
+```
+3. Create an AWS account and retrieve your API keys. Replace the keys in the `aws-config.js` file.
+```
+// aws-config.js
+import AWS from 'aws-sdk';
+// Cấu hình AWS SDK
+AWS.config.update({
+  region: "YOUR_AWS_REGION", // Thay đổi theo khu vực của bạn
+  credentials: new AWS.Credentials('YOUR_ACCESS_KEY_ID','YOUR_SECRET_ACCESS_KEY')
+});
+```
+4. Run the project:
+```
+yarn start
+```
+## Usage
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+After installation, access the app by navigating to [http://localhost:3000](http://localhost:3000). Log in and start chatting with your team! 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Japanese Version
+### 自動翻訳と匿名メッセージング機能を備えたチャットアプリケーション
+このプロジェクトは、異なる言語を話すメンバーがいるチームで、グループディスカッションに参加することをためらう状況を解決するために設計されたチャットアプリケーションです。SITとHUSTの学生が協力するgPBLプログラムのような環境、または言語の壁や社交的な不安が効果的なコミュニケーションを妨げる環境に最適です。
 
-### `npm run eject`
+#### 主な機能:
+- **自動翻訳:** メッセージは自動的に受信者の言語に翻訳され、同じメッセージを複数の言語で手動で翻訳して再送信する必要がなくなります。これにより、情報共有のスピードが向上します。
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **匿名メッセージング:** ユーザーは匿名でメッセージを送信でき、発言することへのためらいや恥ずかしさを減らします。これは、オープンなディスカッションで質問や意見を出すのに消極的なメンバーに特に有用です。
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### 解決される問題:
+- **コミュニケーションの遅延:** 手動翻訳プロセスを排除することで、チームメンバー間のコミュニケーションがスピードアップします。
+- **参加不足:** 匿名メッセージング機能により心理的な障壁が下がり、グループ内でより頻繁かつ率直な対話が促進されます。
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+このアプリは、教育現場での対象ユーザーにとってだけでなく、言語や社交的なダイナミクスがコミュニケーションを妨げる幅広いアプリケーションにも有用です。
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## インストール方法
 
-## Learn More
+1. GitHubからリポジトリをクローンします:
+```
+git clone https://github.com/Yamamoto23069/Anonymitigate.git
+```
+2. 必要な依存関係をインストールします:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+yarn install
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-=======
-# Anonymitigate
->>>>>>> 4ed59b1e8443e6812b880f32e8bee113eddb1f0d
+AWS SDKをインストールします:
+
+
+```
+yarn add aws-sdk
+```
+
+3. AWSアカウントを作成し、APIキーを取得します。その後、`aws-config.js`ファイルのキーを置き換えてください。
+
+```
+// aws-config.js
+import AWS from 'aws-sdk';
+//  AWS SDKの設定
+AWS.config.update({
+  region: "YOUR_AWS_REGION", // 自分の地域に変更
+  credentials: new AWS.Credentials('YOUR_ACCESS_KEY_ID','YOUR_SECRET_ACCESS_KEY')
+});
+```
+
+4. プロジェクトを実行します:
+```
+yarn start
+```
+
+## 使い方
+インストール後、[http://localhost:3000](http://localhost:3000) にアクセスして、ログインし、チームメンバーとチャットを始めてください！
+
