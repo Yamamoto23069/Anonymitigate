@@ -8,7 +8,7 @@ function CustomDialog({ open, onClose, onSubmit }) {
     const [isAnonymous, setIsAnonymous] = useState(true);
 
     const handleSubmit = () => {
-        onSubmit(channelName, isAnonymous,  );
+        onSubmit(channelName, isAnonymous );
         setChannelName(''); // Clear input field
         setIsAnonymous(true); // Reset anonymous state
     };
@@ -62,8 +62,4 @@ const SelectedMembersList = styled.div`
 
 const SelectedMember = styled.div`
     padding: 8px 0;
-<<<<<<< HEAD
 `;
-=======
-`;
->>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
