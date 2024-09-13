@@ -2,11 +2,13 @@ import { Button } from "@mui/material";
 import React from "react";
 import styled from "styled-components";
 import { auth, googleProvider, githubProvider , signInWithPopup} from "../firebase"; 
+import anonymousImage from './Anonymitigate_logo.png'; 
+
 
 function Login() {
     const signIn = async (provider) => {
         try {
-            await auth.signInWithPopup(provider);
+            await signInWithPopup(auth, provider);
         } catch (error) {
             alert(error.message);
         }
@@ -16,11 +18,11 @@ function Login() {
         <LoginContainer>
             <LoginInnerContainer>
                 <img
-                    src="https://cdn.mos.cms.futurecdn.net/SDDw7CnuoUGax6x9mTo7dd.jpg"
+                    src={anonymousImage}
                     alt="Slack logo"
                 />
-                <h1>Slack: Your Digital HQ!</h1>
-                <p>slack.com</p>
+                <h1>Anonymitigate</h1>
+                <p>daidaikichi.com</p>
                 <Button onClick={() => signIn(googleProvider)} variant="contained" color="primary">
                     Sign In With Google
                 </Button>

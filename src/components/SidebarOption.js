@@ -1,49 +1,10 @@
-<<<<<<< HEAD
-import React, { useState } from 'react'
-import styled from 'styled-components'
-=======
 import React, { useState } from 'react';
 import styled from 'styled-components';
->>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 import { collection, addDoc } from 'firebase/firestore';
 import { useDispatch } from "react-redux";
 import { enterRoom } from "../features/appSlice";
 import { db } from '../firebase';
 import CustomDialog from './CustomDialog'; // Import the dialog
-<<<<<<< HEAD
-import LockIcon from "@material-ui/icons/Lock"
-import PersonOutlinedIcon from '@material-ui/icons/PersonOutline'
-import CloseIcon from "@material-ui/icons/Close"
-
-function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channelType }) {    
-    const dispatch = useDispatch();
-    const [dialogOpen, setDialogOpen] = useState(false); // State to manage dialog visibility
-
-    const addChannel = async (channelName, isAnonymous, channelType ) => {
-    if (channelName) {
-        try {
-            const channelsCollection = collection(db, 'rooms');
-            await addDoc(channelsCollection, { name: channelName, isAnonymous, channelType });
-            console.log('Channel added successfully');
-        } catch (error) {
-            console.error('Error adding channel: ', error);
-        }
-    }
-};
-
-const openDialog = () => {
-    setDialogOpen(true);
-};
-
-const closeDialog = () => {
-    setDialogOpen(false);
-};
-
-const handleDialogSubmit = (channelName, isAnonymous, channelType) => {
-    addChannel(channelName, isAnonymous, channelType);
-    closeDialog(); // Close the dialog after submission
-};
-=======
 import LockIcon from "@material-ui/icons/Lock";
 import PersonOutlinedIcon from '@material-ui/icons/PersonOutline';
 import CloseIcon from "@material-ui/icons/Close";
@@ -77,7 +38,6 @@ function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channel
         addChannel(channelName, isAnonymous, channelType);
         closeDialog(); // Close the dialog after submission
     };
->>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
 
     const selectChannel = () => {
         if (id) {
@@ -91,35 +51,6 @@ function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channel
 
     return (
         <>
-<<<<<<< HEAD
-        <SidebarOptionContainer 
-            onClick={addChannelOption ? openDialog : selectChannel} // Use openDialog here
-        >
-            {Icon && <Icon fontSize="small" style={{ padding: 10 }} />}
-            { isAnonymous && (
-                <IconContainer>
-                    <PersonOutlinedIcon style={{ fontSize: 30, verticalAlign: 'middle' }} />
-                    <CloseIcon style={{ fontSize: 25, position: 'absolute', top: 7, left: 3, color: 'red' }} />
-                </IconContainer>
-            )}
-            {Icon ? (
-                <h3>{title}</h3>
-            ) : (
-                <SidebarOptionChannel>
-                    {channelType === 'private' ? <LockIcon style={{ fontSize: 20 }} /> : <span>#</span>} {title}
-                </SidebarOptionChannel>
-            )}
-        </SidebarOptionContainer>
-
-        {/* Render the dialog */}
-        {addChannelOption && (
-            <CustomDialog 
-                open={dialogOpen} 
-                onClose={closeDialog} 
-                onSubmit={handleDialogSubmit}
-            />
-            )}
-=======
             <SidebarOptionContainer 
                 onClick={addChannelOption ? openDialog : selectChannel}
             >
@@ -147,7 +78,6 @@ function SidebarOption({ Icon, title, addChannelOption, id, isAnonymous, channel
                     onSubmit={handleDialogSubmit}
                 />
             )}
->>>>>>> cc4e8d5553464e24587123652b915278d9bcb903
         </>
     );
 }
@@ -179,11 +109,6 @@ const SidebarOptionContainer = styled.div`
 const SidebarOptionChannel = styled.h3`
     padding: 10px 0;
     font-weight: 300;
-`;
-
-const IconContainer = styled.div`
-    position: relative;
-    display: inline-block;
 `;
 
 const IconContainer = styled.div`
